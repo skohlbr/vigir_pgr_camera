@@ -14,10 +14,11 @@ class CameraConfig{
 
     void configure(pgr_camera::PGRCameraConfig &config, uint32_t level);
 
-    void SetExposure(bool _auto, bool onoff, unsigned int value = 50);
-    void SetGain(bool _auto, float value = 0.0);
+    void setExposure(bool _auto, bool onoff, float value = 0.0);
+    void setGain(bool _auto, float value = 0.0);
     void setFrameRate(float value);
-    void SetShutter (bool _auto, float value = 0.015);
+    void setShutter (bool _auto, float value = 0.015);
+    void setWhiteBalance(bool _auto, unsigned int red, unsigned int blue);
 
     void printDetailedInfo();
 

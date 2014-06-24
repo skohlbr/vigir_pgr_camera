@@ -10,41 +10,44 @@ void CameraConfig::configure(pgr_camera::PGRCameraConfig &config, uint32_t level
 {
   // Exposure
   if (config.auto_exposure)
-      this->SetExposure (true, true, 0);
+      this->setExposure (true, true, 0);
   else
-      this->SetExposure (false, true, config.exposure);
+      this->setExposure (false, true, config.exposure);
 
 
   // Shutter
   if (config.auto_shutter)
-      this->SetShutter (true);
+      this->setShutter (true);
   else
-      this->SetShutter (false, (float)config.shutter);
+      this->setShutter (false, (float)config.shutter);
 
   // Gain
   if(config.auto_gain)
-      this->SetGain(true);
+      this->setGain(true);
   else
-      this->SetGain(false, (float)config.gain);
+      this->setGain(false, (float)config.gain);
+
+  this->setWhiteBalance(config.auto_whitebalance, config.whitebalance_red, config.whitebalance_blue);
 
 
   this->setFrameRate( (float) config.framerate );
 }
 
 
-void CameraConfig::SetExposure(bool _auto, bool onoff, unsigned int value)
+void CameraConfig::setExposure(bool _auto, bool onoff, float value)
 {
-    printf( "Set Exposure: _auto: %d, onoff %d, value %u\n", _auto, onoff, value);
+    printf( "Set Exposure: _auto: %d, onoff %d, value %f\n", _auto, onoff, value);
     FlyCapture2::Property prop;
     prop.type = FlyCapture2::AUTO_EXPOSURE;
     prop.autoManualMode = _auto;
     prop.onOff = true;
-    prop.valueA = value;
+    //prop.valueA = value;
+    prop.absValue = value;
     prop.absControl = true;
     cam->SetProperty(&prop);
 }
 
-void CameraConfig::SetGain(bool _auto, float value)
+void CameraConfig::setGain(bool _auto, float value)
 {
     printf( "Set Gain: _auto: %d, value %f\n", _auto, value);
     FlyCapture2::Property prop;
@@ -68,7 +71,7 @@ void CameraConfig::setFrameRate(float value)
     cam->SetProperty(&prop);
 }
 
-void CameraConfig::SetShutter (bool _auto, float value)
+void CameraConfig::setShutter (bool _auto, float value)
 {
     printf( "Set Shutter: _auto: %d, value %f\n", _auto, value);
     FlyCapture2::Property prop;
@@ -78,6 +81,19 @@ void CameraConfig::SetShutter (bool _auto, float value)
     prop.onOff = true;
     prop.absValue = value;
     cam->SetProperty(&prop);
+}
+
+void CameraConfig::setWhiteBalance(bool _auto, unsigned int red, unsigned int blue)
+{
+  printf( "Set WhiteBalance: _auto: %d, red %u, blue: %u \n", _auto, red, blue);
+  FlyCapture2::Property prop;
+  prop.type = FlyCapture2::WHITE_BALANCE;
+  prop.absControl = false;
+  prop.autoManualMode = _auto;
+  prop.onOff = true;
+  prop.valueA = red;
+  prop.valueB = blue;
+  cam->SetProperty(&prop);
 }
 
 void CameraConfig::printDetailedInfo()
