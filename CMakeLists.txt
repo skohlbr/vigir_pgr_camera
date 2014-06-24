@@ -4,11 +4,12 @@ project(pgr_camera)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS camera_info_manager image_transport nodelet roscpp sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS camera_info_manager image_transport nodelet roscpp sensor_msgs  dynamic_reconfigure)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS thread system)
 
+generate_dynamic_reconfigure_options(cfg/PGRCamera.cfg)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -86,8 +87,9 @@ include_directories(
 #add_library(nodelet_uvc_camera src/nodelets.cpp src/camera.cpp src/stereo.cpp src/uvc_cam.cpp)
 #target_link_libraries(nodelet_uvc_camera ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable(pgr_camera_node src/camera_node.cpp src/camera.cpp)
+add_executable(pgr_camera_node src/camera_node.cpp src/camera.cpp src/camera_config.cpp)
 target_link_libraries(pgr_camera_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} flycapture)
+add_dependencies(pgr_camera_node ${PROJECT_NAME}_gencfg  ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_executable(pgr_stereo_node src/stereo_node.cpp src/stereo.cpp)
 target_link_libraries(pgr_stereo_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} flycapture)

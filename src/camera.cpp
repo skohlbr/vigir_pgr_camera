@@ -17,7 +17,8 @@ namespace pgr_camera {
 
 Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       node(_comm_nh), pnode(_param_nh), it(_comm_nh),
-      info_mgr(_comm_nh, "camera"), cam() {
+      info_mgr(_comm_nh, "camera"), cam(),
+    camera_config_manager_(0){
 
       FlyCapture2::Error error;
 
@@ -100,6 +101,39 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
 //         PrintError( error );
 //         return -1;
       }
+
+
+      //FlyCapture2::VideoMode videoMode = FlyCapture2::VIDEOMODE_1280x960RGB;
+      //FlyCapture2::FrameRate frameRate = FlyCapture2::FRAMERATE_30;
+      //cam.SetVideoModeAndFrameRate(videoMode, frameRate);
+
+      //FlyCapture2::Property prop;
+      //prop.type = FlyCapture2::FRAME_RATE;
+      //prop.onOff = true;
+      //prop.autoManualMode = false;
+      //prop.valueA = FlyCapture2::FRAMERATE_30;
+      //cam.SetProperty(&prop);
+
+      //camPropInfo.absValue = 30.0;
+      //cam.SetProperty(&camPropInfo);
+      //FlyCapture2::Property property = properties[FlyCapture2::FRAME_RATE];
+      //property.absValue = 20.0;
+      //cam.SetProperty(&property);
+
+      camera_config_manager_ = new CameraConfig(&cam);
+
+      camera_config_manager_->printDetailedInfo();
+
+      reconfigure_server_.reset(new ReconfigureServer());
+      ReconfigureServer::CallbackType f;
+
+      f = boost::bind(&Camera::configCb, this, _1, _2);
+      reconfigure_server_->setCallback(f);
+
+
+
+
+
 
       /* and turn on the streamer */
       error = cam.StartCapture();
@@ -217,8 +251,11 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         unsigned char *img_frame = NULL;
         uint32_t bytes_used;
 
-        // Retrieve an image
-        error = cam.RetrieveBuffer( &rawImage );
+        {
+          // Retrieve an image
+          boost::mutex::scoped_lock cam_lock (cam_mutex_);
+          error = cam.RetrieveBuffer( &rawImage );
+        }
         if (error != FlyCapture2::PGRERROR_OK)
         {
 //            PrintError( error );
@@ -257,6 +294,16 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
 
         sendInfo(image, capture_time);
       }
+    }
+
+    void Camera::configCb(Config &config, uint32_t level)
+    {
+      boost::mutex::scoped_lock cam_lock (cam_mutex_);
+
+      if (camera_config_manager_){
+          camera_config_manager_->configure(config, level);
+        }
+
     }
 
     Camera::~Camera() {

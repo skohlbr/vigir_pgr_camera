@@ -2,6 +2,11 @@
 #include <image_transport/image_transport.h>
 #include <boost/thread.hpp>
 #include <camera_info_manager/camera_info_manager.h>
+#include <dynamic_reconfigure/server.h>
+
+#include "camera_config.h"
+#include "pgr_camera/PGRCameraConfig.h"
+
 
 #include "flycapture/FlyCapture2.h"
 
@@ -16,7 +21,12 @@ class Camera {
     ~Camera();
 
   private:
+    typedef pgr_camera::PGRCameraConfig Config;
+    typedef dynamic_reconfigure::Server<Config> ReconfigureServer;
+
     void PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo );
+
+    void configCb(Config &config, uint32_t level);
     
     ros::NodeHandle node, pnode;
     image_transport::ImageTransport it;
@@ -32,10 +42,17 @@ class Camera {
     image_transport::Publisher pub;
     ros::Publisher info_pub;
 
+    boost::mutex cam_mutex_;
     FlyCapture2::GigECamera cam;
-    FlyCapture2::Image rawImage;  
+    FlyCapture2::Image rawImage;
     FlyCapture2::Image convertedImage;
     boost::thread image_thread;
+
+    // Dynamic reconfigure
+    //boost::recursive_mutex config_mutex_;
+    boost::shared_ptr<ReconfigureServer> reconfigure_server_;
+
+    CameraConfig* camera_config_manager_;
 };
 
 };
