@@ -91,15 +91,24 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       imageSettings.offsetY = 0;
       imageSettings.height = imageSettingsInfo.maxHeight;
       imageSettings.width = imageSettingsInfo.maxWidth;
-      imageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RAW8;
+      imageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RGB8;
+
+      int cut_x = 190;
+      int cut_y = 70;
+
+      imageSettings.offsetX = cut_x;
+      imageSettings.width = imageSettingsInfo.maxWidth-cut_x*2;
+      imageSettings.offsetY = cut_y;
+      imageSettings.height = imageSettingsInfo.maxHeight-cut_y*2;
+
 
       printf( "Setting GigE image settings...\n" );
 
       error = cam.SetGigEImageSettings( &imageSettings );
       if (error != FlyCapture2::PGRERROR_OK)
       {
-//         PrintError( error );
-//         return -1;
+        ROS_ERROR("Error setting image settings: %s", error.GetDescription());
+        return ;
       }
 
 
