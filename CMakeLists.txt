@@ -4,7 +4,7 @@ project(pgr_camera)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS camera_info_manager image_transport nodelet roscpp sensor_msgs  dynamic_reconfigure)
+find_package(catkin REQUIRED COMPONENTS camera_info_manager image_transport nodelet roscpp sensor_msgs  dynamic_reconfigure cv_bridge)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS thread system)
@@ -52,7 +52,7 @@ generate_dynamic_reconfigure_options(cfg/PGRCamera.cfg)
 catkin_package(
    INCLUDE_DIRS include
 #   LIBRARIES nodelet_uvc_camera
-   CATKIN_DEPENDS roscpp nodelet sensor_msgs
+   CATKIN_DEPENDS roscpp nodelet sensor_msgs cv_bridge
 #  DEPENDS system_lib
 )
 

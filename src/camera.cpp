@@ -9,6 +9,9 @@
 #include "camera_info_manager/camera_info_manager.h"
 #include "image_transport/image_transport.h"
 
+
+#include <opencv2/opencv.hpp>
+
 #include "camera.h"
 
 using namespace sensor_msgs;
@@ -298,6 +301,27 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         image->data.resize(data_size);
 
         memcpy(&image->data[0], convertedImage.GetData(), data_size);
+
+        int rotate = 0;
+
+        if( rotate != 0 )
+        {
+
+
+            cv::Mat mat_img (image->data, false);
+
+            cv::Mat dest ;
+
+            cv::transpose( mat_img, dest );
+
+            if(rotate == 1)
+                cv::flip( dest, mat_img, 0);
+            else
+                cv::flip( dest,mat_img, 1);
+
+            std::swap(image->height, image->width);
+            image->step = image->width * (image_encodings::bitDepth(image->encoding));
+        }
 
         pub.publish(image);
 
