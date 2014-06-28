@@ -270,44 +270,44 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         if (error != FlyCapture2::PGRERROR_OK)
         {
           ROS_ERROR("Error in PGR Camera Retrieve: %s. Continuing", error.GetDescription());
-        }else{
-
-          ros::Time capture_time = ros::Time::now();
-
-          // Convert the raw image
-          error = rawImage.Convert( FlyCapture2::PIXEL_FORMAT_RGB, &convertedImage );
-          if (error != FlyCapture2::PGRERROR_OK)
-          {
-            ROS_ERROR("Error in PGR Camera Convert: %s", error.GetDescription());
-          }else{
-
-            cv_bridge::CvImage cv_image;
-
-            //Zero copy use of camera data
-            cv_image.image = cv::Mat (convertedImage.GetRows(), convertedImage.GetCols(), CV_8UC3, convertedImage.GetData());
-            cv_image.encoding = "rgb8";
-            cv_image.header.stamp = capture_time;
-            cv_image.header.frame_id = frame;
-
-            int rotate = 1;
-
-            if( rotate != 0 )
-            {
-              cv::transpose( cv_image.image, tmp_cvmat );
-
-              if(rotate == 1)
-                cv::flip( tmp_cvmat, cv_image.image, 0);
-              else
-                cv::flip( tmp_cvmat, cv_image.image, 1);
-            }
-
-            const sensor_msgs::ImagePtr image_msg = cv_image.toImageMsg();
-
-            pub.publish(image_msg);
-
-            sendInfo(image_msg, capture_time);
-          }
+          continue;
         }
+
+        ros::Time capture_time = ros::Time::now();
+
+        // Convert the raw image
+        error = rawImage.Convert( FlyCapture2::PIXEL_FORMAT_RGB, &convertedImage );
+        if (error != FlyCapture2::PGRERROR_OK)
+        {
+          ROS_ERROR("Error in PGR Camera Convert: %s", error.GetDescription());
+          continue;
+        }
+
+        cv_bridge::CvImage cv_image;
+
+        //Zero copy use of camera data
+        cv_image.image = cv::Mat (convertedImage.GetRows(), convertedImage.GetCols(), CV_8UC3, convertedImage.GetData());
+        cv_image.encoding = "rgb8";
+        cv_image.header.stamp = capture_time;
+        cv_image.header.frame_id = frame;
+
+        int rotate = 1;
+
+        if( rotate != 0 )
+        {
+          cv::transpose( cv_image.image, tmp_cvmat );
+
+          if(rotate == 1)
+            cv::flip( tmp_cvmat, cv_image.image, 0);
+          else
+            cv::flip( tmp_cvmat, cv_image.image, 1);
+        }
+
+        const sensor_msgs::ImagePtr image_msg = cv_image.toImageMsg();
+
+        pub.publish(image_msg);
+
+        sendInfo(image_msg, capture_time);
       }
     }
 
