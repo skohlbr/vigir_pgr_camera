@@ -84,12 +84,13 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-add_library(camera_nodelet src/camera_nodelet.cpp)
-target_link_libraries(camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+add_library(camera_nodelet src/camera_nodelet.cpp src/camera.cpp src/camera_config.cpp)
+target_link_libraries(camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES} flycapture)
+add_dependencies(camera_nodelet ${PROJECT_NAME}_gencfg  ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(pgr_camera_node src/camera_node.cpp src/camera.cpp src/camera_config.cpp)
-target_link_libraries(pgr_camera_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} flycapture)
-add_dependencies(pgr_camera_node ${PROJECT_NAME}_gencfg  ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_executable(pgr_camera_node src/camera_node.cpp)
+target_link_libraries(pgr_camera_node ${catkin_LIBRARIES} camera_nodelet)
+#add_dependencies(pgr_camera_node ${PROJECT_NAME}_gencfg  ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_executable(pgr_stereo_node src/stereo_node.cpp src/stereo.cpp)
 target_link_libraries(pgr_stereo_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} flycapture)

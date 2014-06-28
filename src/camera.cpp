@@ -9,7 +9,6 @@
 #include "camera_info_manager/camera_info_manager.h"
 #include "image_transport/image_transport.h"
 
-#include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 #include "camera.h"
@@ -19,8 +18,8 @@ using namespace sensor_msgs;
 namespace pgr_camera {
 
 Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
-      node(_comm_nh), pnode(_param_nh), it(_comm_nh),
-      info_mgr(_comm_nh, "camera"), cam(),
+      node(_comm_nh), pnode(_param_nh), it(_param_nh),
+      info_mgr(_param_nh, "camera"), cam(),
     camera_config_manager_(0){
 
       FlyCapture2::Error error;
@@ -51,7 +50,7 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       pnode.getParam("frame_id", frame);
 
       /* advertise image streams and info streams */
-      pub = it.advertise("image_raw", 1);
+      pub = it.advertise("image", 1);
 
       info_pub = node.advertise<CameraInfo>("camera_info", 1);
 
@@ -134,17 +133,13 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
 
       camera_config_manager_ = new CameraConfig(&cam);
 
-      camera_config_manager_->printDetailedInfo();
+      //camera_config_manager_->printDetailedInfo();
 
-      reconfigure_server_.reset(new ReconfigureServer());
+      reconfigure_server_.reset(new ReconfigureServer(_param_nh));
       ReconfigureServer::CallbackType f;
 
       f = boost::bind(&Camera::configCb, this, _1, _2);
       reconfigure_server_->setCallback(f);
-
-      cv::namedWindow( "bla", cv::WINDOW_AUTOSIZE );
-
-
 
       /* and turn on the streamer */
       error = cam.StartCapture();
@@ -265,7 +260,7 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         unsigned char *img_frame = NULL;
         uint32_t bytes_used;
 
-        ROS_INFO_THROTTLE(60.0, "Camera with frame \"%s\" requested %d images, %d erroneous transmissions: (%f) percent",
+        ROS_INFO_THROTTLE(60.0, "Camera with frame \"%s\" requested %d images, %d erroneous transmissions (%f percent)",
                           frame.c_str(),
                           processed_images,
                           retrieval_errors,
