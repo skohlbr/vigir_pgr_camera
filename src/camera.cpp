@@ -269,45 +269,45 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         }
         if (error != FlyCapture2::PGRERROR_OK)
         {
-          ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
-          return ;
-        }
+          ROS_ERROR("Error in PGR Camera Retrieve: %s. Continuing", error.GetDescription());
+        }else{
 
-        ros::Time capture_time = ros::Time::now();
+          ros::Time capture_time = ros::Time::now();
 
-        // Convert the raw image
-        error = rawImage.Convert( FlyCapture2::PIXEL_FORMAT_RGB, &convertedImage );
-        if (error != FlyCapture2::PGRERROR_OK)
-        {
-          ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
-          return ;
-        }
-        
-        cv_bridge::CvImage cv_image;
+          // Convert the raw image
+          error = rawImage.Convert( FlyCapture2::PIXEL_FORMAT_RGB, &convertedImage );
+          if (error != FlyCapture2::PGRERROR_OK)
+          {
+            ROS_ERROR("Error in PGR Camera Convert: %s", error.GetDescription());
+          }else{
 
-        //Zero copy use of camera data
-        cv_image.image = cv::Mat (convertedImage.GetRows(), convertedImage.GetCols(), CV_8UC3, convertedImage.GetData());
-        cv_image.encoding = "rgb8";
-        cv_image.header.stamp = capture_time;
-        cv_image.header.frame_id = frame;
+            cv_bridge::CvImage cv_image;
 
-        int rotate = 1;
+            //Zero copy use of camera data
+            cv_image.image = cv::Mat (convertedImage.GetRows(), convertedImage.GetCols(), CV_8UC3, convertedImage.GetData());
+            cv_image.encoding = "rgb8";
+            cv_image.header.stamp = capture_time;
+            cv_image.header.frame_id = frame;
 
-        if( rotate != 0 )
-        {
-            cv::transpose( cv_image.image, tmp_cvmat );
+            int rotate = 1;
 
-            if(rotate == 1)
+            if( rotate != 0 )
+            {
+              cv::transpose( cv_image.image, tmp_cvmat );
+
+              if(rotate == 1)
                 cv::flip( tmp_cvmat, cv_image.image, 0);
-            else
+              else
                 cv::flip( tmp_cvmat, cv_image.image, 1);
+            }
+
+            const sensor_msgs::ImagePtr image_msg = cv_image.toImageMsg();
+
+            pub.publish(image_msg);
+
+            sendInfo(image_msg, capture_time);
+          }
         }
-
-        const sensor_msgs::ImagePtr image_msg = cv_image.toImageMsg();
-
-        pub.publish(image_msg);
-
-        sendInfo(image_msg, capture_time);
       }
     }
 
