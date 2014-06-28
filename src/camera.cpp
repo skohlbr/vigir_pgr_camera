@@ -66,8 +66,8 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       error = cam.Connect(&guid);
       if (error != FlyCapture2::PGRERROR_OK)
       {
-          //PrintError( error );
-          //return -1;
+        ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+        return ;
       }
       
       // Get the camera information
@@ -75,8 +75,8 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       error = cam.GetCameraInfo(&camInfo);
       if (error != FlyCapture2::PGRERROR_OK)
       {
-          //PrintError( error );
-          //return -1;
+        ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+        return ;
       }
 
       PrintCameraInfo(&camInfo);
@@ -151,8 +151,8 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       error = cam.StartCapture();
       if (error != FlyCapture2::PGRERROR_OK)
       {
-//          PrintError( error );
-//          return -1;
+        ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+        return ;
       }
       ok = true;
       image_thread = boost::thread(boost::bind(&Camera::feedImages, this));
@@ -270,8 +270,8 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         }
         if (error != FlyCapture2::PGRERROR_OK)
         {
-//            PrintError( error );
-            continue;
+          ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+          return ;
         }
 
         ros::Time capture_time = ros::Time::now();
@@ -280,8 +280,8 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         error = rawImage.Convert( FlyCapture2::PIXEL_FORMAT_RGB, &convertedImage );
         if (error != FlyCapture2::PGRERROR_OK)
         {
-//            PrintError( error );
-            continue;
+          ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+          return ;
         }
         
         ImagePtr image(new Image);
