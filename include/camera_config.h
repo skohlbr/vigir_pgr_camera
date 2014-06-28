@@ -1,5 +1,5 @@
-#ifndef PGRCAMERA_H
-#define PGRCAMERA_H
+#ifndef PGR_CAMERA_CONFIG_H_
+#define PGR_CAMERA_CONFIG_H_
 
 #include "flycapture/FlyCapture2.h"
 

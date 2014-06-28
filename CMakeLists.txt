@@ -4,7 +4,7 @@ project(pgr_camera)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS camera_info_manager image_transport nodelet roscpp sensor_msgs  dynamic_reconfigure cv_bridge)
+find_package(catkin REQUIRED COMPONENTS camera_info_manager image_transport nodelet roscpp sensor_msgs  dynamic_reconfigure cv_bridge nodelet)
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS thread system)
@@ -52,7 +52,7 @@ generate_dynamic_reconfigure_options(cfg/PGRCamera.cfg)
 catkin_package(
    INCLUDE_DIRS include
 #   LIBRARIES nodelet_uvc_camera
-   CATKIN_DEPENDS roscpp nodelet sensor_msgs cv_bridge
+   CATKIN_DEPENDS roscpp nodelet sensor_msgs cv_bridge nodelet
 #  DEPENDS system_lib
 )
 
@@ -84,8 +84,8 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-#add_library(nodelet_uvc_camera src/nodelets.cpp src/camera.cpp src/stereo.cpp src/uvc_cam.cpp)
-#target_link_libraries(nodelet_uvc_camera ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+add_library(camera_nodelet src/camera_nodelet.cpp)
+target_link_libraries(camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable(pgr_camera_node src/camera_node.cpp src/camera.cpp src/camera_config.cpp)
 target_link_libraries(pgr_camera_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} flycapture)

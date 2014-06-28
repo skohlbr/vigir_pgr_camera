@@ -1,3 +1,6 @@
+#ifndef PGR_CAMERA__H_
+#define PGR_CAMERA__H_
+
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <boost/thread.hpp>
@@ -57,3 +60,4 @@ class Camera {
 
 };
 
+#endif
