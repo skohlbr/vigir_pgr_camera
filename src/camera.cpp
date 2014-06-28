@@ -79,7 +79,7 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
         return ;
       }
 
-      PrintCameraInfo(&camInfo);
+      //PrintCameraInfo(&camInfo);
 
       FlyCapture2::GigEImageSettingsInfo imageSettingsInfo;
       error = cam.GetGigEImageSettingsInfo( &imageSettingsInfo );
