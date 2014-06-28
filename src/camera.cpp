@@ -265,7 +265,7 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         unsigned char *img_frame = NULL;
         uint32_t bytes_used;
 
-        ROS_INFO_THROTTLE(60.0, "Camera with frame \"%s\" received %d images, %d erroneous transmissions: (%f) percent",
+        ROS_INFO_THROTTLE(60.0, "Camera with frame \"%s\" requested %d images, %d erroneous transmissions: (%f) percent",
                           frame.c_str(),
                           processed_images,
                           retrieval_errors,
