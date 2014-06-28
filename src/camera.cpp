@@ -302,13 +302,11 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         cv_image.header.stamp = capture_time;
         cv_image.header.frame_id = frame;
 
-        int rotate = 1;
-
-        if( rotate != 0 )
+        if( camera_config_manager_->getRotationConfig() != 0 )
         {
           cv::transpose( cv_image.image, tmp_cvmat );
 
-          if(rotate == 1)
+          if(camera_config_manager_->getRotationConfig() == 1)
             cv::flip( tmp_cvmat, cv_image.image, 0);
           else
             cv::flip( tmp_cvmat, cv_image.image, 1);

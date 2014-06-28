@@ -21,11 +21,13 @@ public:
 
   void printDetailedInfo();
 
-
+  int getRotationConfig() const { return rotation_config_; };
 
 
 private:
   FlyCapture2::GigECamera* cam;
+
+  int rotation_config_;
 
 };
 

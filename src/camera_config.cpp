@@ -31,6 +31,8 @@ void CameraConfig::configure(pgr_camera::PGRCameraConfig &config, uint32_t level
 
 
   this->setFrameRate( (float) config.framerate );
+
+  this->rotation_config_ = config.rotate_direction;
 }
 
 
