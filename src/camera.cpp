@@ -257,19 +257,30 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
     void Camera::feedImages() {
       
       FlyCapture2::Error error;
-      unsigned int pair_id = 0;
+
+      int processed_images = 0;
+      int retrieval_errors = 0;
+
       while (ok) {
         unsigned char *img_frame = NULL;
         uint32_t bytes_used;
+
+        ROS_INFO_THROTTLE(60.0, "Camera with frame \"%s\" received %d images, %d erroneous transmissions: (%f) percent",
+                          frame.c_str(),
+                          processed_images,
+                          retrieval_errors,
+                          ((float)retrieval_errors/float(processed_images))*100.0f);
 
         {
           // Retrieve an image
           boost::mutex::scoped_lock cam_lock (cam_mutex_);
           error = cam.RetrieveBuffer( &rawImage );
+          processed_images++;
         }
         if (error != FlyCapture2::PGRERROR_OK)
         {
-          ROS_ERROR("Error in PGR Camera Retrieve: %s. Continuing", error.GetDescription());
+          //ROS_ERROR("Error in PGR Camera Retrieve: %s. Continuing", error.GetDescription());
+          retrieval_errors++;
           continue;
         }
 
@@ -279,7 +290,7 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         error = rawImage.Convert( FlyCapture2::PIXEL_FORMAT_RGB, &convertedImage );
         if (error != FlyCapture2::PGRERROR_OK)
         {
-          ROS_ERROR("Error in PGR Camera Convert: %s", error.GetDescription());
+          //ROS_ERROR("Error in PGR Camera Convert: %s", error.GetDescription());
           continue;
         }
 
