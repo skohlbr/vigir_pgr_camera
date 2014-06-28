@@ -7,6 +7,8 @@
 #include <camera_info_manager/camera_info_manager.h>
 #include <dynamic_reconfigure/server.h>
 
+#include <opencv2/opencv.hpp>
+
 #include "camera_config.h"
 #include "pgr_camera/PGRCameraConfig.h"
 
@@ -19,7 +21,7 @@ class Camera {
   public:
     Camera(ros::NodeHandle comm_nh, ros::NodeHandle param_nh);
     void onInit();
-    void sendInfo(sensor_msgs::ImagePtr &image, ros::Time time);
+    void sendInfo(const sensor_msgs::ImagePtr &image, ros::Time time);
     void feedImages();
     ~Camera();
 
@@ -56,6 +58,9 @@ class Camera {
     boost::shared_ptr<ReconfigureServer> reconfigure_server_;
 
     CameraConfig* camera_config_manager_;
+
+    //Temporary cvMat for rotating images
+    cv::Mat tmp_cvmat;
 };
 
 };

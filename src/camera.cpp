@@ -9,8 +9,8 @@
 #include "camera_info_manager/camera_info_manager.h"
 #include "image_transport/image_transport.h"
 
-
-#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 #include "camera.h"
 
@@ -142,8 +142,7 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       f = boost::bind(&Camera::configCb, this, _1, _2);
       reconfigure_server_->setCallback(f);
 
-
-
+      cv::namedWindow( "bla", cv::WINDOW_AUTOSIZE );
 
 
 
@@ -233,7 +232,7 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         defaultGateway );
 }
 
-    void Camera::sendInfo(ImagePtr &image, ros::Time time) {
+    void Camera::sendInfo(const ImagePtr &image, ros::Time time) {
       CameraInfoPtr info(new CameraInfo(info_mgr.getCameraInfo()));
 
       /* Throw out any CamInfo that's not calibrated to this camera mode */
@@ -284,48 +283,31 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
           return ;
         }
         
-        ImagePtr image(new Image);
-        
-        image->height = convertedImage.GetRows();
-        image->width = convertedImage.GetCols();
-        image->step = convertedImage.GetStride();
-        image->encoding = image_encodings::RGB8;
+        cv_bridge::CvImage cv_image;
 
-        image->header.stamp = capture_time;
-        image->header.seq = pair_id;
+        //Zero copy use of camera data
+        cv_image.image = cv::Mat (convertedImage.GetRows(), convertedImage.GetCols(), CV_8UC3, convertedImage.GetData());
+        cv_image.encoding = "rgb8";
+        cv_image.header.stamp = capture_time;
+        cv_image.header.frame_id = frame;
 
-        image->header.frame_id = frame;
-  
-        int data_size = convertedImage.GetDataSize();
-
-        image->data.resize(data_size);
-
-        memcpy(&image->data[0], convertedImage.GetData(), data_size);
-
-        int rotate = 0;
+        int rotate = 1;
 
         if( rotate != 0 )
         {
-
-
-            cv::Mat mat_img (image->data, false);
-
-            cv::Mat dest ;
-
-            cv::transpose( mat_img, dest );
+            cv::transpose( cv_image.image, tmp_cvmat );
 
             if(rotate == 1)
-                cv::flip( dest, mat_img, 0);
+                cv::flip( tmp_cvmat, cv_image.image, 0);
             else
-                cv::flip( dest,mat_img, 1);
-
-            std::swap(image->height, image->width);
-            image->step = image->width * (image_encodings::bitDepth(image->encoding));
+                cv::flip( tmp_cvmat, cv_image.image, 1);
         }
 
-        pub.publish(image);
+        const sensor_msgs::ImagePtr image_msg = cv_image.toImageMsg();
 
-        sendInfo(image, capture_time);
+        pub.publish(image_msg);
+
+        sendInfo(image_msg, capture_time);
       }
     }
 
