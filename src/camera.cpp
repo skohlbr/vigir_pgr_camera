@@ -24,30 +24,23 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
 
       FlyCapture2::Error error;
 
-      /* default config values */
-      width = 640;
-      height = 480;
-      fps = 10;
       frame = "camera";
-      rotate = false;
 
       /* set up information manager */
       std::string url;
-
       pnode.getParam("camera_info_url", url);
 
       info_mgr.loadCameraInfo(url);
 
-      /* pull other configuration */
+      /* Basic camera config */
       pnode.getParam("serial", serial);
-
-      pnode.getParam("fps", fps);
-      pnode.getParam("skip_frames", skip_frames);
-
-      pnode.getParam("width", width);
-      pnode.getParam("height", height);
-
       pnode.getParam("frame_id", frame);
+
+      //ROI config
+      pnode.getParam("roi_offset_x", roi_offset_x_);
+      pnode.getParam("roi_offset_y", roi_offset_y_);
+      pnode.getParam("roi_width", roi_width_);
+      pnode.getParam("roi_height", roi_height_);
 
       /* advertise image streams and info streams */
       pub = it.advertise("image", 1);
@@ -95,16 +88,26 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       imageSettings.width = imageSettingsInfo.maxWidth;
       imageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RGB8;
 
-      int cut_x = 190;
-      int cut_y = 70;
+      int roi_offset_x_ = 190;
+      int roi_offset_y_ = 70;
+      int roi_width_ = 900;
+      int roi_height_ = 884;
 
-      imageSettings.offsetX = cut_x;
-      imageSettings.width = imageSettingsInfo.maxWidth-cut_x*2;
-      imageSettings.offsetY = cut_y;
-      imageSettings.height = imageSettingsInfo.maxHeight-cut_y*2;
+      imageSettings.offsetX = roi_offset_x_;
+      imageSettings.width = roi_width_;
+      imageSettings.offsetY = roi_offset_y_;
+      imageSettings.height = roi_height_;
+
+      ROS_INFO("PGR Camera with serial %d set to frame_id %s, roi_offset_x: %d roi_offset_y: %d roi_width: %d roi_height: %d ",
+               serial,
+               frame.c_str(),
+               roi_offset_x_,
+               roi_offset_y_,
+               roi_width_,
+               roi_height_);
 
 
-      printf( "Setting GigE image settings...\n" );
+      //printf( "Setting GigE image settings...\n" );
 
       error = cam.SetGigEImageSettings( &imageSettings );
       if (error != FlyCapture2::PGRERROR_OK)

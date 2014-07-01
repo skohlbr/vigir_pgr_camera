@@ -37,7 +37,9 @@ class Camera {
     image_transport::ImageTransport it;
     bool ok;
 
-    int width, height, fps, skip_frames, frames_to_skip;
+    //int width, height, fps, skip_frames, frames_to_skip;
+    int roi_offset_x_, roi_offset_y_, roi_width_, roi_height_;
+
     std::string frame;
     int serial;
     bool rotate;
