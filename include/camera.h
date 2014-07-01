@@ -56,8 +56,10 @@ class Camera {
     boost::thread image_thread;
 
     // Dynamic reconfigure
-    //boost::recursive_mutex config_mutex_;
+    boost::recursive_mutex config_mutex_;
     boost::shared_ptr<ReconfigureServer> reconfigure_server_;
+    Config config_;
+    bool config_updated_;
 
     CameraConfig* camera_config_manager_;
 

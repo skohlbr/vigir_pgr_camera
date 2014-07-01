@@ -29,6 +29,8 @@ private:
 
   int rotation_config_;
 
+  pgr_camera::PGRCameraConfig last_config;
+
 };
 
 

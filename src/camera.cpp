@@ -20,7 +20,7 @@ namespace pgr_camera {
 Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       node(_comm_nh), pnode(_param_nh), it(_param_nh),
       info_mgr(_param_nh, "camera"), cam(),
-    camera_config_manager_(0){
+      config_updated_(false), camera_config_manager_(0){
 
       FlyCapture2::Error error;
 
@@ -88,11 +88,6 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       imageSettings.width = imageSettingsInfo.maxWidth;
       imageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RGB8;
 
-      int roi_offset_x_ = 190;
-      int roi_offset_y_ = 70;
-      int roi_width_ = 900;
-      int roi_height_ = 884;
-
       imageSettings.offsetX = roi_offset_x_;
       imageSettings.width = roi_width_;
       imageSettings.offsetY = roi_offset_y_;
@@ -138,7 +133,7 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
 
       //camera_config_manager_->printDetailedInfo();
 
-      reconfigure_server_.reset(new ReconfigureServer(_param_nh));
+      reconfigure_server_.reset(new ReconfigureServer(config_mutex_, _param_nh));
       ReconfigureServer::CallbackType f;
 
       f = boost::bind(&Camera::configCb, this, _1, _2);
@@ -270,6 +265,15 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
                           ((float)retrieval_errors/float(processed_images))*100.0f);
 
         {
+          boost::lock_guard<boost::recursive_mutex> lock(config_mutex_);
+
+          if (config_updated_){
+            camera_config_manager_->configure(config_, 0);
+            config_updated_ = false;
+          }
+        }
+
+        {
           // Retrieve an image
           boost::mutex::scoped_lock cam_lock (cam_mutex_);
           error = cam.RetrieveBuffer( &rawImage );
@@ -320,12 +324,8 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
 
     void Camera::configCb(Config &config, uint32_t level)
     {
-      boost::mutex::scoped_lock cam_lock (cam_mutex_);
-
-      if (camera_config_manager_){
-          camera_config_manager_->configure(config, level);
-        }
-
+      config_updated_ = true;
+      config_ = config;
     }
 
     Camera::~Camera() {
