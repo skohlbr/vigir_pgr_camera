@@ -43,6 +43,5 @@ This launch file creates a nodelet manager and adds the drivers for both SA came
   <node name="load_right_sa_camera_driver_dyn_config" pkg="dynamic_reconfigure" type="dynparam" 
     args="load right_sa_camera_driver $(find pgr_camera)/params/right_sa_camera_driver.yaml" output="screen"/>
 
-
 </launch>
 
