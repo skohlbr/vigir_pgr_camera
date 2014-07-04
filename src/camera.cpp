@@ -65,7 +65,43 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
           sleep(1);
         }
       }
-      
+
+      ROS_INFO("Connected to PGR Camera with serial %d set to frame_id %s ",
+               serial,
+               frame.c_str());
+
+      unsigned int num_channels;
+      cam.GetNumStreamChannels(&num_channels);
+
+
+      for (unsigned int i = 0; i < num_channels; ++i){
+        FlyCapture2::GigEStreamChannel channel;
+
+        cam.GetGigEStreamChannelInfo(i, &channel);
+
+        printf(
+              "\n*** CHANNEL INFORMATION for channel %u ***\n"
+              "networkInterfaceIndex - %u\n"
+              "hostPost - %u\n"
+              "doNotFragment - %u\n"
+              "packetSize - %u\n"
+              "interPacketDelay - %u\n"
+              "sourcePort - %u\n",
+              i,
+              channel.networkInterfaceIndex,
+              channel.hostPost,
+              channel.doNotFragment,
+              channel.packetSize,
+              channel.interPacketDelay,
+              channel.sourcePort);
+
+        channel.packetSize=7186;
+        channel.interPacketDelay = 400;
+        channel.doNotFragment = false;
+        cam.SetGigEStreamChannelInfo(i, &channel);
+
+      }
+
       // Get the camera information
       FlyCapture2::CameraInfo camInfo;
       error = cam.GetCameraInfo(&camInfo);
@@ -81,8 +117,8 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       error = cam.GetGigEImageSettingsInfo( &imageSettingsInfo );
       if (error != FlyCapture2::PGRERROR_OK)
       {
-//          PrintError( error );
-//P          return -1;
+        ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+        return;
       }
 
       FlyCapture2::GigEImageSettings imageSettings;
@@ -90,7 +126,7 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       imageSettings.offsetY = 0;
       imageSettings.height = imageSettingsInfo.maxHeight;
       imageSettings.width = imageSettingsInfo.maxWidth;
-      imageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_RGB8;
+      imageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_422YUV8;
 
       imageSettings.offsetX = roi_offset_x_;
       imageSettings.width = roi_width_;
