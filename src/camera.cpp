@@ -58,8 +58,12 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       error = cam.Connect(&guid);
       if (error != FlyCapture2::PGRERROR_OK)
       {
-        ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
-        return ;
+        ROS_ERROR("Failed to connect to PGR Camera: %s . Will keep trying.", error.GetDescription());
+
+        while (error != FlyCapture2::PGRERROR_OK && ros::ok()){
+          error = cam.Connect(&guid);
+          sleep(1);
+        }
       }
       
       // Get the camera information
