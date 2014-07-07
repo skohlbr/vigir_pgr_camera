@@ -99,8 +99,24 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
         channel.interPacketDelay = 400;
         channel.doNotFragment = false;
         cam.SetGigEStreamChannelInfo(i, &channel);
-
       }
+
+      FlyCapture2::GigEConfig config;
+      error = cam.GetGigEConfig(&config);
+      if (error != FlyCapture2::PGRERROR_OK)
+      {
+        ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+      }
+
+      config.enablePacketResend = true;
+      cam.SetGigEConfig(&config);
+      if (error != FlyCapture2::PGRERROR_OK)
+      {
+        ROS_ERROR("Error in PGR Camera: %s", error.GetDescription());
+      }
+
+
+
 
       // Get the camera information
       FlyCapture2::CameraInfo camInfo;
