@@ -42,6 +42,9 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       pnode.getParam("roi_width", roi_width_);
       pnode.getParam("roi_height", roi_height_);
 
+      mono_mode_ = false;
+      pnode.getParam("mono_mode", mono_mode_);
+
       /* advertise image streams and info streams */
       pub = it.advertise("image", 1);
 
@@ -142,7 +145,9 @@ Camera::Camera(ros::NodeHandle _comm_nh, ros::NodeHandle _param_nh) :
       imageSettings.offsetY = 0;
       imageSettings.height = imageSettingsInfo.maxHeight;
       imageSettings.width = imageSettingsInfo.maxWidth;
-      imageSettings.pixelFormat = FlyCapture2::PIXEL_FORMAT_422YUV8;
+
+      imageSettings.pixelFormat = mono_mode_ ? FlyCapture2::PIXEL_FORMAT_MONO8 : FlyCapture2::PIXEL_FORMAT_422YUV8;
+
 
       imageSettings.offsetX = roi_offset_x_;
       imageSettings.width = roi_width_;
@@ -344,8 +349,10 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
 
         ros::Time capture_time = ros::Time::now();
 
-        // Convert the raw image
-        error = rawImage.Convert( FlyCapture2::PIXEL_FORMAT_RGB, &convertedImage );
+        error = rawImage.Convert( mono_mode_ ? FlyCapture2::PIXEL_FORMAT_MONO8 : FlyCapture2::PIXEL_FORMAT_RGB,
+                                  &convertedImage );
+
+
         if (error != FlyCapture2::PGRERROR_OK)
         {
           //ROS_ERROR("Error in PGR Camera Convert: %s", error.GetDescription());
@@ -355,8 +362,12 @@ void Camera::PrintCameraInfo( FlyCapture2::CameraInfo* pCamInfo )
         cv_bridge::CvImage cv_image;
 
         //Zero copy use of camera data
-        cv_image.image = cv::Mat (convertedImage.GetRows(), convertedImage.GetCols(), CV_8UC3, convertedImage.GetData());
-        cv_image.encoding = "rgb8";
+        cv_image.image = cv::Mat (convertedImage.GetRows(),
+                                  convertedImage.GetCols(),
+                                  mono_mode_? CV_8UC1 : CV_8UC3,
+                                  convertedImage.GetData());
+
+        cv_image.encoding = mono_mode_ ? "mono8" : "rgb8";
         cv_image.header.stamp = capture_time;
         cv_image.header.frame_id = frame;
 

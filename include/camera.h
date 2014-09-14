@@ -43,6 +43,7 @@ class Camera {
     std::string frame;
     int serial;
     bool rotate;
+    bool mono_mode_;
 
     camera_info_manager::CameraInfoManager info_mgr;
 
