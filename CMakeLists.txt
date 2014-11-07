@@ -116,6 +116,21 @@ install(TARGETS pgr_camera_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+#install the launch files.
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  FILES_MATCHING PATTERN "*.launch"
+  
+)
+
+#install the yaml files.
+install(DIRECTORY params
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  FILES_MATCHING PATTERN "*.yaml"
+  
+)
+
+
 #install(FILES
 #  nodelet_uvc_camera.xml
 #  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
