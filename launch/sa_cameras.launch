@@ -32,7 +32,7 @@ This launch file creates a nodelet manager and adds the drivers for both SA came
  
   <node pkg="nodelet" type="nodelet" name="right_sa_camera_driver"
         args="load pgr_camera/camera_nodelet sa_camera_nodelet_manager" output="screen">
-    <param name="serial" value="12491354" />
+    <param name="serial" value="12502221" />
     <param name="frame_id" type="str" value="r_situational_awareness_camera_optical_frame" />
 
     <!-- ROI is applied before rotating image in camera hardware -->
