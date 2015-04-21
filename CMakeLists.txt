@@ -39,7 +39,7 @@ target_link_libraries(pgr_stereo_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} fly
 #############
 
 ## Mark executables and/or libraries for installation
-install(TARGETS pgr_camera_node
+install(TARGETS pgr_camera_node camera_nodelet pgr_stereo_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
