@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<!--
+This launch file creates a nodelet manager and adds the drivers for both SA cameras to it.
+-->
+
+<launch>
+  
+  <arg name="mono_mode" default="false" />
+  
+  <node pkg="nodelet" type="nodelet" name="sa_camera_nodelet_manager"  args="manager" output = "screen"/>
+
+  <node pkg="nodelet" type="nodelet" name="left_sa_camera_driver"
+        args="load pgr_camera/camera_nodelet sa_camera_nodelet_manager" output="screen">
+    <param name="serial" value="12502220" />
+    <param name="frame_id" type="str" value="l_situational_awareness_camera_optical_frame" />
+
+    <!-- ROI is applied before rotating image in camera hardware -->
+    <param name="roi_offset_x" value="190" />
+    <param name="roi_offset_y" value="72" />
+    <param name="roi_width" value="900" />
+    <param name="roi_height" value="900" />
+    
+    <param name="mono_mode" value="$(arg mono_mode)" />
+    
+    <remap from="/left_sa_camera_driver/image" to="/sa/left/image_raw" />
+    <remap from="camera_info" to="/sa/left/camera_info" />
+  </node>
+
+  <node name="load_left_sa_camera_driver_dyn_config" pkg="dynamic_reconfigure" type="dynparam" 
+    args="load left_sa_camera_driver $(find pgr_camera)/params/left_sa_camera_driver.yaml" output="screen" />
+ 
+  <node pkg="nodelet" type="nodelet" name="right_sa_camera_driver"
+        args="load pgr_camera/camera_nodelet sa_camera_nodelet_manager" output="screen">
+    <param name="serial" value="12502221" />
+    <param name="frame_id" type="str" value="r_situational_awareness_camera_optical_frame" />
+
+    <!-- ROI is applied before rotating image in camera hardware -->
+    <param name="roi_offset_x" value="170" />
+    <param name="roi_offset_y" value="60" />
+    <param name="roi_width" value="900" />
+    <param name="roi_height" value="900" />
+    
+    <param name="mono_mode" value="$(arg mono_mode)" />
+
+    <remap from="/right_sa_camera_driver/image" to="/sa/right/image_raw" />
+    <remap from="camera_info" to="/sa/right/camera_info" />
+  </node>
+
+  <node name="load_right_sa_camera_driver_dyn_config" pkg="dynamic_reconfigure" type="dynparam" 
+    args="load right_sa_camera_driver $(find pgr_camera)/params/right_sa_camera_driver.yaml" output="screen"/>
+
+</launch>
+

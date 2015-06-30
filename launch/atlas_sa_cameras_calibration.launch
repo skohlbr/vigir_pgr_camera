@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<!--
+This launch file launches all nodes relevant to generating image data using the SA cameras on the real robot.
+-->
+
+<launch>
+
+  <!-- Load both SA camera nodelets -->
+  <include file="$(find pgr_camera)/launch/sa_cameras.launch">
+    <arg name="mono_mode" value="true" />
+  </include>  
+
+  <!-- Load SA camera rectification nodelets -->
+  <include file="$(find vigir_wide_angle_image_proc)/launch/sa_camera_nodelets_calibration.launch"/>
+
+  <!-- Load panorama processing node -->
+  <include file="$(find flor_sa_correction_nodelet)/launch/correction.launch"/>
+
+</launch>
+
